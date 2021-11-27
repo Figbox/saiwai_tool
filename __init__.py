@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Body, Depends, UploadFile, File
+from starlette.responses import FileResponse
 
 from app.core.module_class import ApiModule
+from app.modules.saiwai_tool import crud
 
 
 class SaiwaiTool(ApiModule):
@@ -39,8 +41,9 @@ class SaiwaiTool(ApiModule):
             return "succ"
 
         @bp.post('/analysis', summary='分析')
-        def analysis(s: str):
-            return s
+        def analysis():
+            path = crud.dump_json_from_html(self.get_module_directory())
+            return FileResponse(path, media_type='application/json', filename='data.json')
 
     def _get_tag(self) -> str:
         return 'saiwai_tool'

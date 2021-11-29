@@ -2,16 +2,16 @@ from fastapi import APIRouter, Body, Depends, UploadFile, File
 from starlette.responses import FileResponse
 
 from app.core.module_class import ApiModule
+from app.core.package_manager import PackageManager
 from app.modules.saiwai_tool import crud
 
 
 class SaiwaiTool(ApiModule):
     def _register_api_bp(self, bp: APIRouter):
-        @bp.get('/description')
-        def description():
-            return 'this is a sample module_manager description,' \
-                   ' this sample will tell you how to' \
-                   ' create a module_manager for Figbox'
+        @bp.post('/init')
+        def init():
+            PackageManager.install_package(['beautifulsoup4'], 'bs4')
+            PackageManager.install_package(['pdfplumber'])
 
         @bp.post('/upload_html2', summary='二番目のHTMLをアップロードしてください')
         def upload_html2(file: bytes = File(...)):

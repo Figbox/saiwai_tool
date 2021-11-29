@@ -1,12 +1,14 @@
 import json
+import os
 import re
-from typing import List
+from typing import List, Union
 
 
-def param_check(param: str) -> bool:
+def param_check(param: str) -> Union[bool, List[int]]:
     """パラメータをチェックする、例として：　'3~9,22~23,94~95' パラメータが正確
     であればtrueがリターンするはず逆に誤ったであれば　falseがリターンするはず"""
     try:
+        rt = []
         l = param.split(",")
         if len(l) != 3:
             return False
@@ -18,10 +20,38 @@ def param_check(param: str) -> bool:
                 return False
             if int(d[0]) >= int(d[1]):
                 return False
+            rt.append(int(d[0]))
+            rt.append(int(d[1]))
     except:
         return False
-    return True
+    return rt
 
+
+def special_by_pdf(path: str, param: str):
+    import pdfplumber
+    resolution = 196
+    target = param_check(param)
+    if not target:
+        return None
+    full_path = os.path.join(path, 'p4')
+    if not os.path.exists(full_path):
+        os.makedirs(full_path, 0o777)
+    with pdfplumber.open(path + '/saiwai.pdf') as pdf:
+        index = 0
+        for i in range(target[0] - 1, target[1]):
+            pdf.pages[i].to_image(resolution=resolution).save(f'p4/toki_{index}.png')
+            index += 1
+        index = 0
+        for i in range(target[2] - 1, target[3]):
+            pdf.pages[i].to_image(resolution=resolution).save(f'p4/shi_{index}.png')
+            index += 1
+        index = 0
+        for i in range(target[4] - 1, target[5]):
+            pdf.pages[i].to_image(resolution=resolution).save(f'p4/sasami_{index}.png')
+            index += 1
+
+
+# --------下は文字データの処理----------
 
 json_map = {}
 

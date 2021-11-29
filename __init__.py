@@ -40,8 +40,8 @@ class SaiwaiTool(ApiModule):
                 return "fail"
             return "succ"
 
-        @bp.post('/analysis', summary='分析')
-        def analysis():
+        @bp.post('/analysis_get_json', summary='分析してjsonファイルを獲得')
+        def analysis_and_get_json():
             path = crud.dump_json_from_html(self.get_module_directory())
             return FileResponse(path, media_type='application/json', filename='data.json')
 

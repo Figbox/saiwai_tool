@@ -32,22 +32,25 @@ def special_by_pdf(path: str, param: str):
     resolution = 196
     target = param_check(param)
     if not target:
-        return None
+        return
     full_path = os.path.join(path, 'p4')
     if not os.path.exists(full_path):
         os.makedirs(full_path, 0o777)
     with pdfplumber.open(path + '/saiwai.pdf') as pdf:
         index = 0
         for i in range(target[0] - 1, target[1]):
-            pdf.pages[i].to_image(resolution=resolution).save(f'p4/toki_{index}.png')
+            pdf.pages[i].to_image(resolution=resolution).save(
+                f'p4/toki_{index}.png')
             index += 1
         index = 0
         for i in range(target[2] - 1, target[3]):
-            pdf.pages[i].to_image(resolution=resolution).save(f'p4/shi_{index}.png')
+            pdf.pages[i].to_image(resolution=resolution).save(
+                f'p4/shi_{index}.png')
             index += 1
         index = 0
         for i in range(target[4] - 1, target[5]):
-            pdf.pages[i].to_image(resolution=resolution).save(f'p4/sasami_{index}.png')
+            pdf.pages[i].to_image(resolution=resolution).save(
+                f'p4/sasami_{index}.png')
             index += 1
 
 
@@ -56,8 +59,9 @@ def special_by_pdf(path: str, param: str):
 json_map = {}
 
 
-def dump_json_from_html(path: str):
+def dump_json_from_html(path: str, title_text: str):
     by_bsoup(path)
+    json_map[0] = title_text
     json_path = path + "/data.json"
     with open(json_path, "w") as f:
         json.dump(json_map, f)
@@ -73,14 +77,29 @@ class P3:
         json_map[self.index] += txt
 
 
+def remove_ruby(soup):
+    ruby_tags = []
+    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-1"}))
+    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-2"}))
+    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-3"}))
+    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-4"}))
+    print(ruby_tags)
+    for i in ruby_tags:
+        if "※" not in str(i):
+            i.decompose()
+
+
 def by_bsoup(path: str, index: int = 2):
     """BeautifulSoupでHTMLからデータ抽出"""
-    from bs4 import BeautifulSoup, Tag, NavigableString
+    from bs4 import BeautifulSoup, NavigableString, Tag
     global json_map
     if index == 2:
         json_map = {}
     soup = BeautifulSoup(open(f"{path}/{index}.html"), features="html.parser")
-    ls: List[Tag] = soup.find_all(name='div', attrs={"class": re.compile("_idGenObjectStyleOverride-")})
+    remove_ruby(soup)
+    soup.rt.decompose()
+    ls: List[Tag] = soup.find_all(
+        name='div', attrs={"class": re.compile("_idGenObjectStyleOverride-")})
     print(len(ls))
     p3 = None
     now_day = 1
@@ -92,29 +111,24 @@ def by_bsoup(path: str, index: int = 2):
             if tag.p is not None and tag.p.get('class') is not None:
                 # 聖書箇所
                 if tag.p.get('class')[0] == 'みことば本文':
+                    print(tag)
                     p3 = P3(now_day)
                     txt = tag.get_text().strip()
                     p3.write(txt)
-                    print(txt)
                     now_day += 1
                 if 'ノーマル' in tag.p.get('class')[0]:
                     if '聖書箇所' in tag.get_text():
                         txt = '\n' + tag.get_text().strip()
                         p3.write(txt)
-                        print(txt)
                         p3.write('\n--\n')
-                        print('--')
                 # 証し
                 if 'コラム' in tag.p.get('class')[0]:
                     title = tag.previous_sibling
                     while isinstance(title, NavigableString):
                         title = title.previous_sibling
                     p3.write(title.get_text())
-                    print(title)
                     txt = tag.get_text()
                     p3.write(txt)
-                    print(txt)
-                    print('---')
 
                 # if 'コラムのみことば' in tag.p.get('class')[0]:
                 #     txt = tag.get_text().strip()
@@ -127,14 +141,12 @@ def by_bsoup(path: str, index: int = 2):
                     if '●' in txt:
                         p3.write('\n---\n')
                         p3.write(txt)
-                        print(txt)
                         for j in range(1, 10):
                             txt = ls[i + j].get_text()
                             p3.write(txt)
-                            print(txt)
                         p3.write('\n----\n')
-                        print('----')
     except:
-        print(json_map)
+        ...
+        # print(json_map)
     if index == 2:
         by_bsoup(path, index=3)

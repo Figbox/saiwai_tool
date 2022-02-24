@@ -1,3 +1,5 @@
+from datetime import date
+
 from app.core.module_class import ApiModule
 from app.core.package_manager import PackageManager
 from app.modules.saiwai_tool import crud
@@ -51,7 +53,7 @@ class SaiwaiTool(ApiModule):
             if SaiwaiTool.title_text != None:
                 path = crud.dump_json_from_html(
                     self.get_module_directory(), SaiwaiTool.title_text)
-                return FileResponse(path, media_type='application/json', filename='data.json')
+                return FileResponse(path, media_type='application/json', filename=date.today().strftime('%Y-%m') + '.json')
             return "タイトルをアップロードしてください"
 
     def _get_tag(self) -> str:

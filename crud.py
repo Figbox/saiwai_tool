@@ -1,3 +1,6 @@
+# pylint: disable=import-outside-toplevel
+# pylint: disable=import-error
+
 import json
 import os
 import re
@@ -79,10 +82,7 @@ class P3:
 
 def remove_ruby(soup):
     ruby_tags = []
-    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-1"}))
-    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-2"}))
-    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-3"}))
-    ruby_tags.extend(soup.find_all("rt", {"class": "_idGenRuby-4"}))
+    ruby_tags.extend(soup.find_all("rt"))
     print(ruby_tags)
     for i in ruby_tags:
         if "※" not in str(i):

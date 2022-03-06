@@ -39,15 +39,6 @@ class SaiwaiTool(ApiModule):
                 return "fail"
             return "succ"
 
-        @bp.post('/upload_pdf', summary='PDFファイルをアップロード')
-        def upload_pdf(file: bytes = File(...)):
-            try:
-                with open(self.get_module_directory() + "/saiwai.pdf", "wb") as f:
-                    f.write(file)
-            except:
-                return "fail"
-            return "succ"
-
         @bp.post('/analysis_get_json', summary='分析してjsonファイルを獲得')
         def analysis_and_get_json():
             if SaiwaiTool.title_text != None:

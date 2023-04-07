@@ -102,47 +102,47 @@ def by_bsoup(path: str, index: int = 2):
     now_day = 1
     if index == 3:
         now_day = 16
-    try:
-        for i in range(len(ls)):
-            tag = ls[i]
-            if tag.p is not None and tag.p.get("class") is not None:
-                # 聖書箇所
-                if tag.p.get("class")[0] == "みことば本文":
-                    p3 = P3(now_day)
-                    txt = tag.get_text().strip()
+    # try:
+    for i in range(len(ls)):
+        tag = ls[i]
+        if tag.p is not None and tag.p.get("class") is not None:
+            # 聖書箇所
+            if tag.p.get("class")[0] == "みことば本文":
+                p3 = P3(now_day)
+                txt = tag.get_text().strip()
+                p3.write(txt)
+                now_day += 1
+            if "ノーマル" in tag.p.get("class")[0]:
+                if "聖書箇所 " in tag.get_text():
+                    txt = "\n" + tag.get_text().strip()
                     p3.write(txt)
-                    now_day += 1
-                if "ノーマル" in tag.p.get("class")[0]:
-                    if "聖書箇所" in tag.get_text():
-                        txt = "\n" + tag.get_text().strip()
-                        p3.write(txt)
-                        p3.write("\n--\n")
-                # 証し
-                if "コラム" in tag.p.get("class")[0]:
-                    title = tag.previous_sibling
-                    while isinstance(title, NavigableString):
-                        title = title.previous_sibling
-                    p3.write(title.get_text())
-                    txt = tag.get_text()
-                    p3.write(txt)
+                    p3.write("\n--\n")
+            # 証し
+            if "コラム" in tag.p.get("class")[0]:
+                title = tag.previous_sibling
+                while isinstance(title, NavigableString):
+                    title = title.previous_sibling
+                p3.write(title.get_text().replace('\n', '') + '\n\n')
+                txt = tag.get_text()
+                p3.write(txt)
 
-                # if 'コラムのみことば' in tag.p.get('class')[0]:
-                #     txt = tag.get_text().strip()
-                #     p3.write('- ' + txt)
-                # 解説
-                if (
-                    "ParaOverride-" in tag.p.get("class")[0]
-                    or "扉本文" in tag.p.get("class")[0]
-                ):
-                    txt = tag.get_text()
-                    if "●" in txt:
-                        p3.write("\n---\n")
-                        p3.write(txt)
-                        for j in range(1, 10):
-                            txt = ls[i + j].get_text()
-                            p3.write(txt)
-                        p3.write("\n----\n")
-    except:
-        ...
+            # if 'コラムのみことば' in tag.p.get('class')[0]:
+            #     txt = tag.get_text().strip()
+            #     p3.write('- ' + txt)
+            # 解説
+            if (
+                "静聴と適用のヒント" in tag.p.get_text()
+            ):
+                txt = tag.get_text()
+                print('aa - ' + txt)
+                p3.write("\n---\n")
+                p3.write(txt)
+                for j in range(1, 4):
+                    txt = ls[i + j].get_text()
+                    print('bb - ' + txt[0:15])
+                    p3.write(txt)
+                p3.write("\n----\n")
+    # except:
+    #     print("error")
     if index == 2:
         by_bsoup(path, index=3)
